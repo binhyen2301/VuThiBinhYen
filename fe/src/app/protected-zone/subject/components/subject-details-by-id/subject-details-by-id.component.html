@@ -1,0 +1,166 @@
+<div class="animated fadeIn">
+    <p-panel [style]="{'margin-bottom':'10px'}">
+        <p-header>
+            <div class="ui-g-3">
+            </div>
+            <div class="ui-g-6">
+                <div class="row">
+                    <div class="col">
+                        <div class="item q-mb-md">
+                            <strong>Mã môn học: </strong>{{subject.code}}
+                        </div>
+                        <div class="item q-mb-md">
+                            <strong>Tên môn học: </strong>{{subject.name}}
+                        </div>
+                        <div class="item q-mb-md">
+                            <strong>Giáo viên giảng dạy:
+                            </strong>{{subject.gvgd.fullName+" ("+subject.gvgd.teacher_code+")"}}
+                        </div>
+                        <div class="item q-mb-md">
+                            <strong>Giáo viên giảng dạy 1:
+                            </strong>{{subject.gv1.fullName+" ("+subject.gv1.teacher_code+")"}}
+                        </div>
+                        <div class="item q-mb-md">
+                            <strong>Giáo viên giảng dạy 2:
+                            </strong>{{subject.gv2.full_name+" ("+subject.gv2.teacher_code+")"}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-g-3">
+            </div>
+        </p-header>
+
+
+    </p-panel>
+    <p-panel #pnl [style]="{'margin-bottom':'10px'}">
+        <p-header>
+            <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                <div class="ui-g-6">
+                    <div class="ui-grid-col-2">
+                        <span class="required">Mã sinh viên:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input type="text" pInputText [(ngModel)]="maSV">
+                    </div>
+                </div>
+                <div class="ui-g-6">
+                    <div class="ui-grid-col-2">
+                        <span class="required">Họ tên :</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input type="text" pInputText [(ngModel)]="hoTen">
+                    </div>
+                </div>
+                <div class="ui-g-6">
+                    <div class="ui-grid-col-2">
+                        <span>Lớp học:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <p-dropdown [options]="rootClass" emptyFilterMessage="Không có dữ liệu"
+                            [style]="{'width':'100%'}" placeholder="Chọn lớp học" filter="true" [showClear]="true"
+                            [(ngModel)]="classId">
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="ui-g-6">
+                    <div class="ui-grid-col-2">
+                        <span>Nhóm/đề tài:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <p-dropdown [options]="rootGroup" emptyFilterMessage="Không có dữ liệu"
+                            [style]="{'width':'100%'}" [(ngModel)]="groupId" placeholder="Chọn đề tài nhóm"
+                            filter="true" [showClear]="true">
+                        </p-dropdown>
+                    </div>
+                </div>
+            </div>
+        </p-header>
+        <p-header>
+            <div class="ui-g-6"></div>
+            <div class="ui-g-6" style="display: flex;justify-content: flex-end;">
+                <button appPermission appFunction="SYSTEM_USER" appAction="CREATE" pButton type="button"
+                    label="Tìm kiếm" icon="fa fa-search" (click)="loadData()"></button>
+                <button appPermission appFunction="SYSTEM_USER" appAction="CREATE" pButton type="button"
+                    label="Import DSSV" class="ui-button-success" icon="fa fa-plus" (click)="showAddModal()" style="margin-left: 10px;"></button>
+                <button appPermission appFunction="SYSTEM_USER" appAction="CREATE" pButton type="button"
+                    label="Kết thúc học phần" class="ui-button-warning" icon="fa fa-plus" (click)="ketThucHocPhan()" style="margin-left: 10px;
+                    ;"></button>
+            </div>
+        </p-header>
+        <p-table #dt [value]="items" selectionMode="multiple" [(selection)]="selectedItems" [metaKeySelection]="true"
+            [responsive]="true" [scrollable]="true" (onRowSelect)="onRowSelect($event)"
+            (onRowUnselect)="onRowUnselect($event)">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 35px">
+                        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                    </th>
+                    <th [pSortableColumn]="'students.name'">Mã sinh viên
+                        <p-sortIcon [field]="'students.name'"></p-sortIcon>
+                    </th>
+                    <th [pSortableColumn]="'students.fullName'">Họ tên
+                        <p-sortIcon [field]="'students.fullName'"></p-sortIcon>
+                    </th>
+                    <th [pSortableColumn]="'students.classrooms.name'">Lớp học
+                        <p-sortIcon [field]="'students.classrooms.name'"></p-sortIcon>
+                    </th>
+                    <th [pSortableColumn]="'students.dob'">Nhóm/Tên đề tài
+                        <p-sortIcon [field]="'students.dob'"></p-sortIcon>
+                    </th>
+                    <th [pSortableColumn]="'students.dob'">Ngày nộp
+                        <p-sortIcon [field]="'students.dob'"></p-sortIcon>
+                    </th>
+                    <th [pSortableColumn]="'students.dob'">File bài tập
+                        <p-sortIcon [field]="'students.dob'"></p-sortIcon>
+                    </th>
+                    <th [pSortableColumn]="'students.dob'">Điểm thi
+                        <p-sortIcon [field]="'students.dob'"></p-sortIcon>
+                    </th>
+                    <th [pSortableColumn]="'students.dob'">Thao tác
+                        <p-sortIcon [field]="'students.dob'"></p-sortIcon>
+                    </th>
+                </tr>
+
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+                <tr [pSelectableRow]="row">
+                    <td style="width: 35px;">
+                        <span class="ui-column-title">Lựa chọn</span>
+                        <p-tableCheckbox [value]="row"></p-tableCheckbox>
+                    </td>
+                    <td>{{row.students.name}}</td>
+                    <td>{{row.students.fullName}}</td>
+                    <td>{{row.students.classrooms.name}}</td>
+                    <td>{{row.group != null ?row.group.tille:"Chưa chọn đề tài"}}</td>
+                    <td>{{row.subDate |date:'dd-MM-yyyy HH:mm'}} <p style="color: red;">{{status(row.subDate,subject.expireDate)}}</p></td>
+                    <td *ngIf="row.fileName == null;else file">Chưa nộp file bài tập</td>
+                    <ng-template #file>
+                        <td><a href="{{row.fileName}}" target="_blank">Xem file bài tập</a></td>
+                    </ng-template>
+                    <td>{{row.score != null ?row.score:"Chưa chấm điểm"}}</td>
+                    <td> 
+                        <button data-toggle="tooltip" title="Chấm điểm" *ngIf="row.score == null;else buttonBlock" appPermission appFunction="SYSTEM_USER"
+                            appAction="UPDATE" pButton type="button" icon="fa fa-edit" class="ui-button-warning" (click)="showModalChamDiem(row.id,row.fileName)"></button>
+                        <ng-template #buttonBlock>
+                            <button pButton type="button" data-toggle="tooltip" title="Đã chấm điểm" icon="fa fa-edit" class="ui-button-error"
+                                (click)="redirect(row.subject.id)"></button>
+                        </ng-template>
+                    </td>
+
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="summary">
+                <div style="text-align: left">
+                    Tổng số bản ghi: {{totalRecords | number}}
+                </div>
+            </ng-template>
+        </p-table>
+        <p-paginator [rows]="pageSize" [totalRecords]="totalRecords" (onPageChange)="pageChanged($event)"
+            [rowsPerPageOptions]="[10,20,50,100]"></p-paginator>
+        <p-blockUI [target]="pnl" [blocked]="blockedPanel">
+            <p-progressSpinner [style]="{width: '100px', height: '100px', position:'absolute',top:'25%',left:'50%'}"
+                strokeWidth="2" animationDuration=".5s"></p-progressSpinner>
+        </p-blockUI>
+    </p-panel>
+</div>

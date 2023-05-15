@@ -1,0 +1,160 @@
+package com.haivn.authenticate;
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.haivn.dto.UserDetail;
+import com.haivn.enums.EHttpStatus;
+import com.haivn.service.TblUserService;
+import com.haivn.utils.Utils;
+import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.token.TokenService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.*;
+
+@WebFilter("/*")
+@Component
+@Slf4j
+//@Order(2)
+public class JwtRequestFilter extends OncePerRequestFilter {
+    private static final String[] HEADERS_TO_TRY = {
+            "X-Forwarded-For",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_X_FORWARDED",
+            "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR",
+            "HTTP_FORWARDED",
+            "HTTP_VIA",
+            "REMOTE_ADDR" };
+
+    @Autowired
+    private JwtUtil jwtUtils;
+
+    @Autowired
+    private TblUserService tblUserService;
+
+
+    public static UserDetail user = null;
+    
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        String jwt = parseJwt(request);
+        if (jwt != null && jwtUtils.validateJwtToken(jwt) == jwtUtils.NotException) {
+            String username = jwtUtils.getUserNameFromJwtToken(jwt);
+            UserDetails userDetails = tblUserService.loadUserByUsername(username);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else if (jwt != null && jwtUtils.validateJwtToken(jwt) == jwtUtils.ExpiredJwtException) {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(EHttpStatus.UNAUTHORIZED.getCode());
+            final Map<String, Object> body = new HashMap<>();
+            body.put("timestamp", Utils.getDateTimeCurrent());
+            body.put("status", EHttpStatus.UNAUTHORIZED.getCode());
+            body.put("message", EHttpStatus.UNAUTHORIZED);
+            body.put("data", EHttpStatus.UNAUTHORIZED.getMessage());
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(response.getOutputStream(), body);
+            return;
+        } else if (jwt != null) {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(EHttpStatus.UNAUTHORIZED.getCode());
+            final Map<String, Object> body = new HashMap<>();
+            body.put("timestamp", Utils.getDateTimeCurrent());
+            body.put("status", EHttpStatus.UNAUTHORIZED.getCode());
+            body.put("message", EHttpStatus.UNAUTHORIZED);
+            body.put("data", EHttpStatus.UNAUTHORIZED.getMessage());
+            final ObjectMapper mapper = new ObjectMapper();
+
+
+            mapper.writeValue(response.getOutputStream(), body);
+            return;
+        }
+        filterChain.doFilter(request, response);
+    }
+
+    private String parseJwt(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7);
+        }
+        return null;
+    }
+    private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                null, null, null);
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        request.setAttribute("claims", ex.getClaims());
+    }
+
+    public String getClientIpAddress(HttpServletRequest request)
+    {
+        for (String header : HEADERS_TO_TRY) {
+            String ip = request.getHeader(header);
+            if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+                return ip;
+            }
+        }
+        return request.getRemoteAddr();
+    }
+
+    private void logPayLoad(MultiReadHttpServletRequest request) {
+        final StringBuilder params = new StringBuilder();
+        final String method = request.getMethod().toUpperCase();
+        final String ipAddress = getClientIpAddress(request);
+        final String userAgent = request.getHeader("User-Agent");
+        log.info(String.format("============Begin request=========="));
+        log.info(String.format("Access from ip:%s;ua:%s", ipAddress, userAgent));
+        log.info(String.format("Method : %s requestUri %s", method, request.getRequestURI()));
+        params.append("Query Params:").append(System.lineSeparator());
+        Enumeration<String> parameterNames = request.getParameterNames();
+
+        for (; parameterNames.hasMoreElements();) {
+            String paramName = parameterNames.nextElement();
+            String paramValue = request.getParameter(paramName);
+            if ("password".equalsIgnoreCase(paramName) || "pwd".equalsIgnoreCase(paramName)) {
+                paramValue = "*****";
+            }
+            params.append("---->").append(paramName).append(": ").append(paramValue).append(System.lineSeparator());
+        }
+        log.info(params.toString());
+        /** request body */
+
+        if ("POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method)) {
+            try {
+                log.info(IOUtils.toString(request.getInputStream()));
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        log.info(String.format("============End-request=========="));
+    }
+}
+
