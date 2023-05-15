@@ -1,0 +1,23 @@
+<div class="login-page" [@routerTransition]>
+    <div class="row justify-content-md-center">
+        <div class="col-md-8 dhcn"></div>
+        <div class="col-md-4" style="background-color: #222;height: 100%;">
+            <img src="assets/images/th.jpg" width="150px" class="user-avatar" />
+            <h1>Hệ thống bài tập lớn khoa CNTT</h1>
+            <h3>Trang sinh viên</h3>
+            <form role="form">
+                <div class="form-content">
+                    <div class="form-group">
+                        <input type="text" pInputText [(ngModel)]="username"  name="username" class="form-control input-underline input-lg"  placeholder="{{ 'Tên tài khoản' | translate }}">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" pInputText [(ngModel)]="password"  name="password" class="form-control input-underline input-lg" placeholder="{{ 'Mật khẩu' | translate }}">
+                    </div>
+                </div>
+                <a class="btn rounded-btn"  (click)="login()">{{ 'Đăng nhập' | translate }}</a>
+                &nbsp;
+            </form>
+        </div>
+    </div>
+</div>

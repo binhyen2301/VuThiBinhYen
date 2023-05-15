@@ -1,0 +1,111 @@
+<!--Modal add and edit-->
+<div class="modal-header">
+    <h4 class="modal-title pull-left">{{dialogTitle}}</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="bsModalRef.hide()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<form class="form-horizontal form-label-left" novalidate [formGroup]="entityForm" (ngSubmit)="saveChange()">
+    <div class="modal-body div-scroll">
+        <p-panel #pnl header="Thông tin" [toggleable]="true" [collapsed]="false">
+            <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        <span class="required">Tài khoản:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input type="text" pInputText [pKeyFilter]="noSpecial" formControlName="username">
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <app-validation-message [entityForm]="entityForm" fieldName="username"
+                            [validationMessages]="validation_messages"></app-validation-message>
+                    </div>
+                </div>
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        <span class="required">Mật khẩu:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input type="password" pInputText formControlName="password">
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <app-validation-message [entityForm]="entityForm" fieldName="password"
+                            [validationMessages]="validation_messages"></app-validation-message>
+                    </div>
+                </div>
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        <span class="required">Họ tên:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input type="text" pInputText [pKeyFilter]="noSpecial" formControlName="fullName">
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <app-validation-message [entityForm]="entityForm" fieldName="fullName"
+                            [validationMessages]="validation_messages"></app-validation-message>
+                    </div>
+                </div>
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        <span class="required">Email:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input type="text" pInputText pKeyFilter="email" formControlName="email">
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <app-validation-message [entityForm]="entityForm" fieldName="email"
+                            [validationMessages]="validation_messages"></app-validation-message>
+                    </div>
+                </div>
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        <span>Điện thoại:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <input type="text" pInputText pKeyFilter="int" formControlName="phone">
+                    </div>
+                </div>
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        <span>Vai trò:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <p-dropdown [options]="rootRole" emptyFilterMessage="Không có dữ liệu"
+                            [style]="{'width':'100%'}" formControlName="role_id" placeholder="Chọn vai trò"
+                            filter="true" [showClear]="true">
+                        </p-dropdown>
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <app-validation-message [entityForm]="entityForm" fieldName="role_id"
+                            [validationMessages]="validation_messages"></app-validation-message>
+                    </div>
+                </div>
+                <div class="ui-grid-row">
+                    <div class="ui-grid-col-2">
+                        <span>Trạng thái:</span>
+                    </div>
+                    <div class="ui-grid-col-6">
+                        <p-dropdown [options]="rootStatus" emptyFilterMessage="Không có dữ liệu"
+                            [style]="{'width':'100%'}" formControlName="status" placeholder="Chọn trạng thái"
+                            filter="true" [showClear]="true">
+                        </p-dropdown>
+                    </div>
+                    <div class="ui-grid-col-4">
+                        <app-validation-message [entityForm]="entityForm" fieldName="status"
+                            [validationMessages]="validation_messages"></app-validation-message>
+                    </div>
+                </div>
+            </div>
+            <p-blockUI [target]="pnl" [blocked]="blockedPanel">
+                <p-progressSpinner [style]="{width: '100px', height: '100px', position:'absolute',top:'25%',left:'50%'}"
+                    strokeWidth="2" animationDuration=".5s"></p-progressSpinner>
+            </p-blockUI>
+        </p-panel>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" pbutton class="btn btn-primary" [disabled]="!entityForm.valid || btnDisabled">Lưu
+            lại</button>
+        &nbsp;
+        <button type="button" pbutton class="btn btn-default" (click)="bsModalRef.hide()">Đóng</button>
+    </div>
+</form>
