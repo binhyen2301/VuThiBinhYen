@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AAM ADMIN</title>
+</head>
+<script type="application/javascript">
+    const urlParams = new URLSearchParams(window.location.search);
+    const myParam = urlParams.get('token');
+    var url = "https://aamhr.com.vn";
+    var appUri = "app://com.aam.hr.travel.vn/";
+    if(myParam!=null && myParam!=""){
+        appUri += "changePassword?token=" + myParam;
+        url = "https://app.aamhr.com.vn/#/changePassword?token=" + myParam;
+    }
+    if (navigator.userAgent.toLowerCase().indexOf("android") > -1) {
+        url = "market://details?id=com.aam.hr.vn";
+        //appUri = "app://com.aam.hr.travel.vn/changePassword?token=dfgdfsgdfs";
+        // if (confirm("Tải ứng dụng?")) {
+        //
+        // }
+    }
+    if (navigator.userAgent.toLowerCase().indexOf("like mac") > -1) {
+        url = "https://apps.apple.com/vn/app/aam/id6443514460?l=vi";
+        //appUri = "aam://com.aam.hr.travel.vn";
+    }
+
+    (function () {
+        var app = {
+            launchApp: function () {
+                window.location.replace(appUri);
+                this.timer = setTimeout(this.openWebApp, 2000);
+            },
+            openWebApp: function () {
+                window.location.replace(url);
+            }
+        };
+        app.launchApp();
+    })();
+</script>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi"
+          name="viewport"/>
+    <link rel='stylesheet' th:href='@{/css/bootstrap.min.css}'>
+    <link rel='stylesheet' th:href='@{/css/formio.full.min.css}'>
+    <script th:src='@{/js/jquery.slim.min.js}'></script>
+    <script th:src='@{/js/formio.full.min.js}'></script>
+    <script th:src='@{/js/lang_vi.js}'></script>
+    <style>
+        body a[href*='help.form.io'] {
+            display: none !important;
+        }
+
+        .formio-component-authenticate {
+            display: none !important;
+        }
+    </style>
+    <script type='text/javascript'>
+        var domain = "http://localhost:8088";
+        let formioOptions = {
+            saveDraft: true,
+            alwaysConfirmComponentRemoval: true
+            // builder: {
+            //   basic: false,
+            //   advanced: false,
+            //   data: false,
+            //   customBasic: {
+            //     title: 'Basic Components',
+            //     default: true,
+            //     weight: 0,
+            //     components: {
+            //       textfield: true,
+            //       // password: true,
+            //       // number: true,
+            //       textarea: true,
+            //       radio: true,
+            //       checkbox: true,
+            //       button: true,
+            //       selectboxes: true,
+            //       select: true
+            //     }
+            //   },
+            //   custom: {
+            //     title: 'Thành phần riêng',
+            //     weight: 10,
+            //     components: {
+            //       firstName: {
+            //         title: 'First Name',
+            //         key: 'firstName',
+            //         icon: 'terminal',
+            //         schema: {
+            //           label: 'First Name',
+            //           type: 'textfield',
+            //           key: 'firstName',
+            //           input: true
+            //         }
+            //       },
+            //       lastName: {
+            //         title: 'Last Name',
+            //         key: 'lastName',
+            //         icon: 'terminal',
+            //         schema: {
+            //           label: 'Last Name',
+            //           type: 'textfield',
+            //           key: 'lastName',
+            //           input: true
+            //         }
+            //       },
+            //       email: {
+            //         title: 'Email',
+            //         key: 'email',
+            //         icon: 'at',
+            //         schema: {
+            //           label: 'Email',
+            //           type: 'email',
+            //           key: 'email',
+            //           input: true
+            //         }
+            //       },
+            //       password: {
+            //         title: 'Password',
+            //         key: 'password',
+            //         icon: 'terminal',
+            //         schema: {
+            //           label: 'Password',
+            //           type: 'password',
+            //           key: 'password',
+            //           input: true
+            //         }
+            //       },
+            //       phoneNumber: {
+            //         title: 'Mobile Phone',
+            //         key: 'mobilePhone',
+            //         icon: 'phone-square',
+            //         schema: {
+            //           label: 'Mobile Phone',
+            //           type: 'phoneNumber',
+            //           key: 'mobilePhone',
+            //           input: true
+            //         }
+            //       },
+            //       numberOnly: {
+            //         title: 'Number',
+            //         key: 'numberOnly',
+            //         icon: 'fa fa-dot-circle-o',
+            //         schema: {
+            //           label: 'Number',
+            //           type: 'number',
+            //           key: 'numberOnly',
+            //           input: true
+            //         }
+            //       }
+            //     }
+            //   },
+            //   layout: {
+            //     components: {
+            //       table: true
+            //     }
+            //   }
+            // },
+            // editForm: {
+            //   textfield: [
+            //     {
+            //       key: 'api',
+            //       ignore: true
+            //     }
+            //   ]
+            // }
+        };
+
+        let metaSchema = {
+            components: [
+                {
+                    type: "textfield",
+                    label: "Tiêu đề biểu mẫu",
+                    description: "",
+                    placeholder: "Nhập tiêu đề biểu mẫu",
+                    key: "fName",
+                    input: true,
+                    inputType: "text",
+                    keyModified: false,
+                    autofocus: true,
+                    protected: true,
+                    validate: {
+                        "required": true,
+                        "minLength": "2",
+                        "maxLength": "255"
+                    }
+                },
+                {
+                    label: "Chọn danh mục chức năng",
+                    widget: "choicesjs",
+                    // placeholder: "Chọn 1 danh mục chức năng",
+                    tableView: true,
+                    dataSrc: "url",
+                    data: {
+                        "url": domain + "/form/get/danhmuc",
+                        "headers": [
+                            {
+                                "key": "",
+                                "value": ""
+                            }
+                        ]
+                    },
+                    valueProperty: "id",
+                    template: "<span>{{ item.text }}</span>",
+                    validate: {
+                        "required": true
+                    },
+                    key: "fCate",
+                    type: "select",
+                    disableLimit: false,
+                    input: true
+                },
+                {
+                    label: "Chọn khoa",
+                    widget: "choicesjs",
+                    // placeholder: "Chọn 1 danh mục chức năng",
+                    tableView: true,
+                    dataSrc: "url",
+                    data: {
+                        "url": domain + "/api/department/get/depform",
+                        "headers": [
+                            {
+                                "key": "",
+                                "value": ""
+                            }
+                        ]
+                    },
+                    valueProperty: "id",
+                    template: "<span>{{ item.text }}</span>",
+                    validate: {
+                        "required": true
+                    },
+                    key: "fDepartment",
+                    type: "select",
+                    disableLimit: false,
+                    input: true
+                },
+                {
+                    label: "Chọn loại form",
+                    widget: "choicesjs",
+                    // placeholder: "Chọn 1 danh mục chức năng",
+                    tableView: true,
+                    dataSrc: "url",
+                    data: {
+                        "url": domain + "/api/loai-form/get/form",
+                        "headers": [
+                            {
+                                "key": "",
+                                "value": ""
+                            }
+                        ]
+                    },
+                    valueProperty: "id",
+                    template: "<span>{{ item.text }}</span>",
+                    validate: {
+                        "required": true
+                    },
+                    key: "fStyle",
+                    type: "select",
+                    disableLimit: false,
+                    input: true
+                }
+            ]
+        };
+
+        let schema = {
+            components: [
+                // {
+                //     type: "textfield",
+                //     label: "Tiêu đề biểu mẫu",
+                //     description: "",
+                //     placeholder: "Nhập tiêu đề biểu mẫu",
+                //     key: "fName",
+                //     input: true,
+                //     inputType: "text",
+                //     keyModified: false,
+                //     autofocus: true,
+                //     protected: true,
+                //     validate: {
+                //         "required": true,
+                //         "minLength": "2",
+                //         "maxLength": "255"
+                //     }
+                // },
+                // {
+                //     label: "Chọn danh mục chức năng",
+                //     widget: "choicesjs",
+                //     placeholder: "Chọn 1 danh mục chức năng",
+                //     tableView: true,
+                //     dataSrc: "url",
+                //     data: {
+                //         "url": "http://10.1.0.192:8088/form/get/danhmuc",
+                //         "headers": [
+                //             {
+                //                 "key": "",
+                //                 "value": ""
+                //             }
+                //         ]
+                //     },
+                //     valueProperty: "id",
+                //     template: "<span>{{ item.text }}</span>",
+                //     validate: {
+                //         "required": true
+                //     },
+                //     key: "fCate",
+                //     type: "select",
+                //     disableLimit: false,
+                //     input: true
+                // },
+                {
+                    type: "textfield",
+                    label: "Họ tên",
+                    description: "",
+                    placeholder: "Nhập họ tên bệnh nhân",
+                    key: "namePatient",
+                    input: true,
+                    inputType: "text",
+                    keyModified: false,
+                    autofocus: true,
+                    protected: true,
+                    validate: {
+                        "required": true,
+                        "minLength": "2",
+                        "maxLength": "100"
+                    }
+                },
+                {
+                    type: "textfield",
+                    label: "Mã bệnh nhân",
+                    description: "",
+                    placeholder: "Nhập mã bệnh nhân",
+                    key: "codePatient",
+                    input: true,
+                    inputType: "text",
+                    validate: {
+                        "required": true,
+                        "minLength": "6",
+                        "maxLength": "100"
+                    }
+                },
+                {
+                    type: "textfield",
+                    label: "Tác nhân",
+                    description: "",
+                    placeholder: "Tác nhân",
+                    key: "causeId",
+                    input: true,
+                    inputType: "text",
+                    validate: {
+                        "required": true,
+                        "minLength": "6",
+                        "maxLength": "100"
+                    }
+                }
+                // {
+                //     type: 'button',
+                //     action: 'submit',
+                //     key: 'submitButton102',
+                //     label: 'Gửi đi',
+                //     theme: 'success'
+                // },
+                // {
+                //     type: 'button',
+                //     action: 'saveState',
+                //     state: 'draft',
+                //     key: 'saveDraft102',
+                //     label: 'Lưu nháp',
+                //     theme: 'info'
+                // }
+            ],
+            components2: [
+                {
+                    label: "Columns",
+                    columns: [
+                        {
+                            "components": [
+                                {
+                                    "type": "button",
+                                    "key": "submitButton102",
+                                    "label": "Gửi dữ liệu",
+                                    "theme": "success",
+                                    "input": true,
+                                    "tableView": false
+                                }
+                            ],
+                            "width": 3,
+                            "offset": 0,
+                            "push": 0,
+                            "pull": 0,
+                            "size": "md",
+                            "currentWidth": 50
+                        },
+                        {
+                            "components": [
+                                {
+                                    "type": "button",
+                                    "action": "custom",
+                                    "state": "draft",
+                                    "key": "saveDraft102",
+                                    "label": "Lưu nháp",
+                                    "theme": "info",
+                                    "input": true,
+                                    "tableView": false,
+                                    "custom": "localStorage.setItem('formData', JSON.stringify(submission.data));\nalert('Đã lưu nháp');",
+                                }
+                            ],
+                            "width": 4,
+                            "offset": 0,
+                            "push": 0,
+                            "pull": 0,
+                            "size": "md",
+                            "currentWidth": 6
+                        }
+                    ],
+                    key: "columns102",
+                    type: "columns",
+                    input: false,
+                    tableView: false
+                }
+            ]
+        };
+
+        let metaComponents = {
+            components: [
+                {
+                    "legend": "Tạo biểu mẫu",
+                    "key": "formHeader",
+                    "type": "fieldset",
+                    "label": "Tạo biểu mẫu",
+                    "input": false,
+                    "components": metaSchema.components,
+                }
+            ]
+        };
+
+        let components = {
+            components: [
+                {
+                    "legend": "",
+                    "key": "formHeader",
+                    "type": "fieldset",
+                    "label": "Tạo biểu mẫu",
+                    "input": false,
+                    "components": schema.components,
+                },
+                // ,{
+                //   "legend": "Body",
+                //   "key": "body",
+                //   "type": "fieldset",
+                //   "label": "Body",
+                //   "input": false,
+                //   "components": []
+                // },
+                {
+                    "legend": "",
+                    "key": "footer",
+                    "type": "fieldset",
+                    "label": "Footer",
+                    "input": false,
+                    "components": schema.components2
+                }
+            ]
+        };
+
+        let builderOptions = _.merge(lang_vi, formioOptions, {
+            sanitize: false,
+            noDefaultSubmitButton: true
+        });
+
+        // var form;
+        // var formTemplateToSave;
+
+    </script>
+</head>
+<body style="width: auto !important; overflow-x: hidden !important;">
+<!--<div style="margin: 5px 5px 20px 5px;">-->
+<!--    <div>Tên biểu mẫu: <span style="color: red;">*</span></div>-->
+<!--    <div><input id="fName" type="text"></div>-->
+<!--    <div>Thuộc chức năng: <span style="color: red;">*</span></div>-->
+<!--    <div><select id="fCate" style="width: 210px;">-->
+<!--        <option selected value="1">CLABSI</option>-->
+<!--        <option value="2">VAE</option>-->
+<!--    </select>-->
+<!--    </div>-->
+<!--</div>-->
+<div id='form_meta'></div>
+<div id='builder'></div>
+<div id="pushjson" style="text-align: center;margin-bottom: 30px">
+    <input onclick="saveForm()" style="width: 150px;height: 40px;font-size: 18px;background-color: coral;"
+           type="button" value="Lưu biểu mẫu"/>
+</div>
+<div id='submission' style="display: block;"></div>
+</body>
+<script>
+    function saveForm() {
+        var val = document.getElementById('submission').innerHTML;
+        // alert(val);
+        var hexString = Date.now().toString(16);
+        var xhr = new XMLHttpRequest();
+
+        var url = domain + "/form/post";
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        // xhr.setRequestHeader("Accept", "application/json");
+        // xhr.overrideMimeType("multipart/form-data");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // var json = JSON.parse(xhr.responseText);
+                console.log(xhr.responseText);
+                alert("Lưu biểu mẫu thành công!");
+            }
+        };
+        // var formName = $('#fName').val();
+        // var cateName = $("#fCate").find(":selected").val();
+        var formName = $("input[name='data[fName]']").val();
+        var cateName = $("select[name='data[fCate]']").find(":selected").val();
+        var depName = $("select[name='data[fDepartment]']").find(":selected").val();
+        var styleFormName = $("select[name='data[fStyle]']").find(":selected").val();
+        if (formName === "") {
+            alert("Tiêu đề biểu mẫu không được để trống!");
+            return false;
+        }
+        if (!cateName || cateName === "") {
+            alert("Bạn phải chọn 1 danh mục chức năng!");
+            return false;
+        }
+        if (!depName || depName === "") {
+            alert("Bạn phải chọn 1 Khoa - Bệnh viện!");
+            return false;
+        }
+        if (!styleFormName || styleFormName === "") {
+            alert("Bạn phải chọn 1 loại form!");
+            return false;
+        }
+        var data = {name: formName, cateId: cateName ,depId:depName ,formStyle:styleFormName,content: JSON.parse(val)};
+        alert(htmlDecode(JSON.stringify(data)));
+        xhr.send(htmlDecode(JSON.stringify(data)));
+    }
+
+    window.onload = function () {
+        Formio.createForm(document.getElementById('form_meta'), metaComponents);
+        Formio.builder(document.getElementById('builder'), components, builderOptions)
+            .then(function (create_form) {
+                create_form.nosubmit = true;
+                document.getElementById('submission').innerHTML = '';
+                document.getElementById('submission').appendChild(document.createTextNode(JSON.stringify(create_form.schema, null, 4)));
+                create_form.on("change", function (e) {
+                    // var jsonSchema = JSON.stringify(create_form.schema, null, 4);
+                    document.getElementById('submission').innerHTML = '';
+                    document.getElementById('submission').appendChild(document.createTextNode(JSON.stringify(create_form.schema, null, 4)));
+                });
+                create_form.on('submit', function (submission) {
+                    // document.getElementById('submission').innerHTML='';
+                    // document.getElementById('submission').appendChild(document.createTextNode("dfgdfgdf49"));
+                    // console.log(submission);
+
+                    // alert('Submission sent to custom endpoint. See developer console.');
+                    // return Formio.fetch(domain + '/form/post', {
+                    //     body: JSON.stringify(submission),
+                    //     headers: {
+                    //         'content-type': 'application/json'
+                    //     },
+                    //     method: 'POST',
+                    //     mode: 'cors',
+                    // }).then(function (response) {
+                    //     create_form.emit('submitDone', submission)
+                    //     response.json()
+                    // })
+                });
+                create_form.on('error', (errors) => {
+                    //Error Code
+                })
+                create_form.on("render", function () {
+                    //Any Render Overrides?
+                })
+            });
+    };
+
+    function htmlDecode(input) {
+        var doc = new DOMParser().parseFromString(input, "text/html");
+        return doc.documentElement.textContent;
+    }
+</script>
+</html>

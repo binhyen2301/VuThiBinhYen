@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi"
+          name="viewport"/>
+    <!--    <link rel='stylesheet' th:href='@{/css/font-awesome.min.css}'>-->
+    <link rel='stylesheet' th:href='@{/css/bootstrap.min.css}'>
+    <link rel='stylesheet' th:href='@{/css/formio.full.min.css}'>
+    <!--    <script th:src='@{/js/jquery.slim.min.js}'></script>-->
+    <script th:src='@{/js/formio.full.min.js}'></script>
+    <script th:src='@{/js/lang_vi.js}'></script>
+    <script type='text/javascript'>
+        // var domain = "http://localhost:8088";
+        var domain = "http://10.1.0.135:8088";
+        let formioOptions = {
+            // renderMode: "html",
+            flatten: true,
+            sanitize: false
+            // saveDraft: true
+            // readOnly: true
+        };
+
+        let builderOptions = _.merge(lang_vi, formioOptions, {
+            // viewAsHtml: true,
+            sanitize: false,
+            saveDraft: true,
+            saveDraftThrottle: 10000,
+            noDefaultSubmitButton: true
+        });
+        var formLastData;
+        function callApi() {
+            var request = new XMLHttpRequest(); // Create a request variable and assign a new XMLHttpRequest object to it.
+            request.open('GET', domain+'/form-json/get/[[${formJsonId}]]'); // Open a new connection, using the GET request on the URL endpoint
+            request.send();
+
+            request.onload = async function () {
+                // var data = this.response;
+                // return data;
+                formLastData = JSON.parse(this.response);
+                // document.getElementById('submission').innerHTML = data // depending on your response targert your desired property.
+            }
+        }
+        callApi();
+
+        window.onload = function () {
+
+            let url = domain+'/form/[[${formId}]]';
+            Formio.createForm(document.getElementById('formio'), url, builderOptions)
+                .then(function (view_form) {
+                    // view_form.url = domain+'/form/view-form/[[${formId}]]';
+                    view_form.nosubmit = true;
+                    view_form.submission = formLastData;
+                    // var currentData = localStorage.getItem('formData');
+                    // if (currentData) {
+                    //     view_form.submission = {data: JSON.parse(currentData)};
+                    // }
+
+                    view_form.on("change", function (e) {
+                        //var jsonSchema = JSON.stringify(view_form.schema, null, 4);
+                        //document.getElementById('submission').innerHTML='';
+                        //document.getElementById('submission').appendChild(document.createTextNode(JSON.stringify(view_form.schema, null, 4)));
+                    });
+                    view_form.on('submit', function (submission) {
+                        // document.getElementById('submission').innerHTML='';
+                        // document.getElementById('submission').appendChild(document.createTextNode("dfgdfgdf49"));
+                        // console.log(submission);
+                        return Formio.fetch(domain+'/form-json/put/[[${formId}]]', {
+                            body: JSON.stringify(submission),
+                            headers: {
+                                'content-type': 'application/json'
+                            },
+                            method: 'PUT',
+                            mode: 'cors',
+                        }).then(function (response) {
+                            view_form.emit('submitDone', submission);
+                            response.json();
+                            localStorage.removeItem('currentData');
+                            alert('done');
+                        })
+                    });
+                    view_form.on('error', (errors) => {
+                        //Error Code
+                    })
+                    view_form.on("render", function () {
+                        //Any Render
+                    })
+                });
+        };
+    </script>
+</head>
+<body>
+<div id='formio'></div>
+<div id='submission'></div>
+</body>
+</html>

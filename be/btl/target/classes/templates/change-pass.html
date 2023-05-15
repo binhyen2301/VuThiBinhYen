@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đổi mật khẩu</title>
+</head>
+<body>
+    <form action="http://localhost:8080/api/forget-pass/verify" method="post">
+<!--    <form action="https://www.youtube.com/" method="get">-->
+        <h2>Mật khẩu mới</h2>
+        <input type="hidden" name="code" th:value="${code}">
+        <input name="new_pass">
+        <input type="submit" value="Đổi mật khẩu">
+    </form>
+</body>
+</html>
